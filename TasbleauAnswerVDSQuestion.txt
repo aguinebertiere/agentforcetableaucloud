@@ -1,0 +1,5 @@
+Convert the {!$Input:resultSet} output into summarised formatted text to answer user's question as followed {!$Input:promptText}
+
+Output using a marked down text format.
+
+Add the "query_plan" entry of the {!$Input:explanation} below, and name that paragraph "Explanation".
