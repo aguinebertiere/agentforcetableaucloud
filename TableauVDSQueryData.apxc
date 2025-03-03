@@ -8,9 +8,10 @@ public with sharing class TableauVDSQueryData {
     // Wrapper classes for structured input and output
     // 
     
+    
     public class RequestWrapper {
         @InvocableVariable
-        public String vdsPayload;  // Assumes vdsPayload is a valid JSON string in the specified format
+        public String vdsPayload;  // Assumes vdsPayload is a valid JSON string in the specified format, but will accommodate extra characters before first bracket and after last bracket
         
         @InvocableVariable
         public String token;
@@ -30,6 +31,20 @@ public with sharing class TableauVDSQueryData {
         public String status; // Indicates success or error status
     }
     
+    public static String extractContentBetweenFirstAndLastAccolades(String inputString) {
+        if (String.isBlank(inputString)) {
+            return null;
+        }
+        
+        Integer firstOpenAccoladeIndex = inputString.indexOf('{');
+        Integer lastCloseAccoladeIndex = inputString.lastIndexOf('}');
+        
+        if (firstOpenAccoladeIndex == -1 || lastCloseAccoladeIndex == -1 || lastCloseAccoladeIndex <= firstOpenAccoladeIndex) {
+            return inputString; // No valid accolades or invalid order.
+        }
+        
+        return inputString.substring(firstOpenAccoladeIndex, lastCloseAccoladeIndex +1);
+    }
     
     @InvocableMethod(label='Query Tableau Metadata' description='Queries metadata from Tableau Virtual Data Source')
     public static List<ResponseWrapper> queryMetadata(List<RequestWrapper> requestList) {
@@ -64,7 +79,7 @@ public with sharing class TableauVDSQueryData {
                             Map<String, Object> payload = new Map<String, Object>{ 'datasource' => datasourceLuid };
                                 
                                 // extracting the query from the payload
-                                Object result = JSON.deserializeUntyped(extractedPayload);
+                                Object result = JSON.deserializeUntyped(extractContentBetweenFirstAndLastAccolades(extractedPayload));
                 
                 if (result instanceof Map<String, Object>) {
                     Map<String, Object> resultMap = (Map<String, Object>)result;
